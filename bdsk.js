@@ -1,6 +1,25 @@
 //可以看成是c#中的using Java中的import
 const { state } = require('bleno')
 var bleno = require('bleno')
+var mcpadc = require('mcp-spi-adc');
+var Gpio = require('onoff').Gpio;
+var led1 = new Gpio(17, 'out');
+var led2 = new Gpio(27, 'out');
+var led3 = new Gpio(22, 'out');
+var buzzer = new Gpio(18, 'out');
+var link_loss_alert_level = 0;
+var immediate_alert_level = 0;
+var temperature_timer;
+var celsius = 0.00;
+var flash_count = 0;
+var flash_state = 1;
+var beep_count = 0;
+var beep_state = 1;
+var alert_timer;
+var flashing = 0;
+var beeping = 0;
+var active_leds = [];
+
 //本段代码含义这是一个event当蓝牙ble通电时，响应事件执行广播。
 bleno.on('stateChange',function(state){
     console.log("on ->stateChange: " +state);
@@ -88,6 +107,8 @@ bleno.on("advertisingStart",function(error){
                 })
             ]
         }),
+
+        //自定义的服务
         //  proximity monitoring service
         new bleno.PrimaryService({
             uuid: '3E099910293F11E493BDAFD0FE6D1DFD',
@@ -147,9 +168,102 @@ bleno.on("advertisingStart",function(error){
 }
 }); 
 
+//蓝牙打开触发事件，执行该段发麻
 bleno.on('accept', function (clientAddress) {
     console.log('on -> accept, client: ' + clientAddress);
+    flash_count = 0;
+    flashing = 0;
+    clearInterval(alert_timer);
+    beepOff();
+    allLedsOff();
     });
     bleno.on('disconnect', function (clientAddress) {
     console.log("Disconnected from address: " + clientAddress);
-    });
+});
+
+function startFlashing(led, interval, times) {
+    flash_count = times * 2;
+    active_leds.push(led);
+    alert_timer = setInterval(flash_leds, interval);
+    flashing = 1;
+}
+
+function flash_leds() {
+    for (var i = 0; i < active_leds.length; i++) {
+    active_leds[i].writeSync(flash_state);
+    }
+    if (flash_state == 1) {
+    flash_state = 0;
+    } else {
+    flash_state = 1;
+    }
+    flash_count--;
+    if (flash_count == 0 && beeping == 0) {
+    clearInterval(alert_timer);
+    active_leds = [];
+ } }
+
+ function allLedsOff() {
+    led1.writeSync(0);
+    led2.writeSync(0);
+    led3.writeSync(0);
+   }
+   function beepOff() {
+    beeping = 0;
+    buzzer.writeSync(0);
+   }
+   function beep() {
+   buzzer.writeSync(beep_state);
+   if (beep_state == 1) {
+   beep_state = 0;
+   } else {
+   beep_state = 1;
+   }
+   beep_count--;
+   if (beep_count == 0) {
+    beep_state = 0;
+    buzzer.writeSync(beep_state);
+   beeping = 0;
+   clearInterval(alert_timer);
+   active_leds = [];
+} }
+
+function allLedsOff() {
+    led1.writeSync(0);
+    led2.writeSync(0);
+    led3.writeSync(0);
+   }
+function beepOff() {
+    beeping = 0;
+    buzzer.writeSync(0);
+   }
+function beep() {
+   buzzer.writeSync(beep_state);
+   if (beep_state == 1) {
+   beep_state = 0;
+   } else {
+   beep_state = 1;
+   }
+   beep_count--;
+   if (beep_count == 0) {
+    beep_state = 0;
+    buzzer.writeSync(beep_state);
+   beeping = 0;
+   clearInterval(alert_timer);
+   active_leds = [];
+ } }
+
+ function u8AToHexString(u8a) {
+    if (u8a == null) {
+    return '';
+    }
+    hex = '';
+    for (var i = 0; i < u8a.length; i++) {
+    hex_pair = ('0' + u8a[i].toString(16));
+    if (hex_pair.length == 3) {
+    hex_pair = hex_pair.substring(1, 3);
+    }
+    hex = hex + hex_pair;
+    }
+    return hex.toUpperCase();
+    }
