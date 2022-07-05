@@ -6,7 +6,7 @@ bleno.on('stateChange',function(state){
     console.log("on ->stateChange: " +state);
 
     if (state == "poweredOn"){
-        bleno.startAdvertising("XiangGeGe",['1803']);
+        bleno.startAdvertising("翔哥哥device",['1803']);
     }else{
         bleno.stopAdvertising();
     }
