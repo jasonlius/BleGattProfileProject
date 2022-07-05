@@ -1,0 +1,24 @@
+{
+  "name": "blegattprofileproject",
+  "version": "1.0.0",
+  "description": "To implement a GATT Server on raspberryPi https://github.com/jasonlius/BleGattProfileProject.git",
+  "main": "bdsk.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonlius/BleGattProfileProject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasonlius/BleGattProfileProject/issues"
+  },
+  "homepage": "https://github.com/jasonlius/BleGattProfileProject#readme",
+  "dependencies": {
+    "bleno": "^0.5.0",
+    "mcp-spi-adc": "^3.2.0",
+    "onoff": "^6.0.3"
+  }
+}
