@@ -22,6 +22,7 @@ var flashing = 0;
 var beeping = 0;
 var active_leds = [];
 
+//蓝牙上电广播的事件
 bleno.on('stateChange', function (state) {
 	console.log('on -> stateChange: ' + state);
 
@@ -31,7 +32,7 @@ bleno.on('stateChange', function (state) {
 		bleno.stopAdvertising();
 	}
 });
-
+//广播GATT服务的事件
 bleno.on('advertisingStart', function (error) {
 	console.log('on -> advertisingStart: ' + (error ? 'error ' + error : 'success'));
 
@@ -159,7 +160,7 @@ bleno.on('advertisingStart', function (error) {
 						// If the client unsubscribes, we stop broadcasting the message
 						onUnsubscribe: function () {
 							console.log("unsubscribed from temperature measurement indications");
-							clearInterval(temperature_timer);
+						(temperature_timer);
 						}
 					})
 				]
@@ -167,11 +168,12 @@ bleno.on('advertisingStart', function (error) {
 		]);
 	}
 });
-
+//设置GATT的services
 bleno.on('servicesSet', function (error) {
 	console.log('on -> servicesSet: ' + (error ? 'error ' + error : 'success'));
 });
 
+//接受蓝牙连接请求的事件
 bleno.on('accept', function (clientAddress) {
 	console.log('on -> accept, client: ' + clientAddress);
 	flash_count = 0;
@@ -182,6 +184,7 @@ bleno.on('accept', function (clientAddress) {
 	allLedsOff();
 });
 
+//断开蓝牙请求的事件
 bleno.on('disconnect', function (clientAddress) {
 	console.log("Disconnected from address: " + clientAddress);
 	if (link_loss_alert_level > 0) {
@@ -191,6 +194,7 @@ bleno.on('disconnect', function (clientAddress) {
 	}
 });
 
+//-------外围电路根据GATT收到的数据的一些行为--------------
 function startFlashing(led, interval, times) {
 	flash_count = times * 2;
 	active_leds.push(led);
@@ -285,6 +289,7 @@ function getLed(level) {
 	}
 }
 
+//--------温度传感器对收到数据转化为摄氏度的一个算法------------
 function simulateTemperatureSensor(updateValueCallback) {
 	temperature_timer = setInterval(function () {
 		celsius = celsius + 0.1;
